@@ -14,7 +14,7 @@ a{color:inherit;text-decoration:none}
 h1,h2,h3,p,dl,dd{margin:0}
 .scene{position:fixed;inset:0;overflow:hidden}
 
-.bar{position:fixed;z-index:20;inset:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) var(--safe) 24px;pointer-events:none;background:linear-gradient(#faf8ff 30%,#faf8ff00)}
+.bar{position:fixed;z-index:20;inset:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top,0px)) var(--safe) 24px;pointer-events:none;background:linear-gradient(var(--top) 22%,transparent)}
 .bar>*{pointer-events:auto}
 .bar nav{display:flex;gap:4px}
 .brand{font-weight:600;font-size:19px;display:flex;gap:10px;align-items:center;white-space:nowrap;min-height:44px}
@@ -119,7 +119,7 @@ h1,h2,h3,p,dl,dd{margin:0}
 .exit a small{display:block;font-weight:300;font-size:14px}
 .exit a.alt{background:none;color:var(--ink);font-weight:400;font-size:15px}
 .exit a.alt:hover{color:var(--violet)}
-.hall-top{position:absolute;inset:0 0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) var(--safe) 30px;background:linear-gradient(#fffffff2 30%,#ffffff00);pointer-events:none}
+.hall-top{position:absolute;inset:0 0 auto;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) var(--safe) 30px;background:linear-gradient(var(--top) 20%,transparent);pointer-events:none}
 .hall-top>*{pointer-events:auto}
 .hall-top .back{justify-self:start}
 .hall-title{text-align:center;line-height:1.4}
@@ -176,7 +176,7 @@ dialog::backdrop{background:#e6ddffcc}
 .about .who{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:24px}
 .about .who b{display:block;font-weight:600;font-size:22px;line-height:1.6}
 
-.view{background:linear-gradient(160deg,#e9efff,#f1eaff);overflow:hidden}
+.view{background:linear-gradient(#e9eeff,#f1eaff);overflow:hidden}
 .view[open]{display:flex;flex-direction:column}
 .v-top,.v-nav,.v-pages{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px var(--safe)}
 .v-top{padding-top:calc(12px + env(safe-area-inset-top,0px))}
@@ -278,7 +278,7 @@ dialog::backdrop{background:#e6ddffcc}
 .hang u,.work .badge{border-radius:2px 9px 2px 9px}
 .in .plate{background:#ffffffe8;border-top:3px solid var(--deep)}
 /* صفحة القسم */
-.wing{background:var(--trace2),linear-gradient(200deg,#fff,var(--wall) 45%,var(--wall2));background-attachment:local}
+.wing{background:var(--trace2),linear-gradient(var(--wall),color-mix(in srgb,var(--wall) 55%,#fff) 30%,var(--wall) 60%,var(--wall2));background-attachment:local}
 .zlist a{border-radius:var(--tech);border:1.5px solid #ffffff;background:#ffffffb8}
 .zlist img,.zlist .strip em{border-radius:3px 10px 3px 10px}
 /* القاعة */
@@ -294,7 +294,7 @@ dialog::backdrop{background:#e6ddffcc}
 .exit{background:linear-gradient(#ffffff66 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,#ffffff66 1px,transparent 1px) 0 0/40px 40px,linear-gradient(#fff,#e9e3ff)}
 .rail{border-radius:0;height:7px}.rail i{border-radius:0}
 /* النوافذ */
-.sheet{background:linear-gradient(160deg,#eef3ff,#f6f1ff 50%,#fff)}
+.sheet{background:linear-gradient(#e9eeff,#f3efff 46%,#fff)}
 .search,.g-list section,.about .nums div,.mas button{border-radius:6px 24px 6px 24px}
 .g-list section{border-top:4px solid var(--c)}
 .v-body video{border-radius:4px}
@@ -312,3 +312,8 @@ body.dlg .wing{visibility:hidden}
 @media(min-width:600px){.lobby.port .plate b{font-size:38px}.lobby.port .plate.long b{font-size:29px}.lobby.port .plate span{font-size:20px}.lobby.port .plate i{font-size:17px}.lobby.port .hang u{font-size:16px}.lobby.port .door>.in::after{width:128px;height:118px}.lobby.port .door .ico{width:74px;height:74px}}
 .sign.big{white-space:normal;width:max-content;max-width:min(88vw,760px)}
 .hall-title{min-width:0}.hall-title strong{line-height:1.4}
+.scene{background-color:var(--top)}
+.intro{background:var(--top)}.lobby{background:var(--top)}.hall{background:var(--top)}
+dialog{background-color:#e9eeff}
+:root{--top:#d3daff}
+html{background:#d3daff}
