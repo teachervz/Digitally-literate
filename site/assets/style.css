@@ -48,9 +48,6 @@ h1,h2,h3,p,dl,dd{margin:0}
 /* البهو */
 .lobby{background:linear-gradient(#fdfcff 0 44%,#ece6ff 62%,#d9d3fb)}
 .bay{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0;transform-style:preserve-3d}
-.bay-wall{position:absolute;background:linear-gradient(#fff,#f3efff 50%,#e3dcfd)}
-.bay-wall::before,.bay-wall::after{content:"";position:absolute;inset:0 auto 0 0;width:26px;background:linear-gradient(90deg,#e1d9fc,#fff)}
-.bay-wall::after{inset:0 0 0 auto;transform:scaleX(-1)}
 .door{position:absolute;display:block;color:var(--ink);padding:0;text-align:center;clip-path:var(--arch);background:linear-gradient(90deg,#d7ccfb,#fff 12% 88%,#d7ccfb);transition:filter .3s}
 .door>.in{position:absolute;inset:16px 16px 0;clip-path:var(--arch);background:linear-gradient(var(--wall2),var(--wall))}
 .door>.in::before{content:"";position:absolute;inset:9% 13% 0;clip-path:var(--arch);background:linear-gradient(#ffffff80,#ffffff20)}
@@ -68,7 +65,6 @@ h1,h2,h3,p,dl,dd{margin:0}
 .door.soon .in{background:linear-gradient(#e3dff3,#f1eefb)}
 .door.soon .plate b{color:#7d74a8}
 .door.soon .ico{top:36%;color:#9d94c6}
-.disc{position:absolute;border-radius:50%;background:repeating-radial-gradient(circle,#ffffff00 0 150px,#ffffffd0 150px 153px),radial-gradient(circle,#fff 0,#ebe5ff 45%,#d6cdfa)}
 .lobby-ui{position:absolute;inset:auto 0 0;padding:26px var(--safe) calc(18px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:center;gap:18px;pointer-events:none}
 .lobby-ui>*{pointer-events:auto}
 .lob-now{min-width:min(320px,56vw);text-align:center;font-weight:600;font-size:18px;line-height:1.4}
@@ -100,12 +96,6 @@ h1,h2,h3,p,dl,dd{margin:0}
 
 /* الرواق */
 .hall{background:radial-gradient(circle at 50% 47%,#fff 0 12%,var(--wall) 45%,var(--wall2))}
-.seg{position:absolute;left:0;top:0;width:0;height:0;transform-origin:0 0;transform-style:preserve-3d}
-.pl{position:absolute}
-.pl.w{background-image:var(--trace),linear-gradient(#fff,var(--wall) 30%,var(--wall2) 92%,#fff 92%,#fff)}
-.pl.f{background-image:linear-gradient(#ffffff90 2px,transparent 2px),linear-gradient(90deg,transparent calc(50% - 1px),#ffffffb0 calc(50% - 1px) calc(50% + 1px),transparent calc(50% + 1px)),linear-gradient(90deg,var(--wall2),#f7f4ffd0 32% 68%,var(--wall2));background-size:100% 260px,auto,auto;opacity:.86}
-.pl.c{background:linear-gradient(90deg,var(--wall),#fff 34%,#fffdf4 50%,#fff 66%,var(--wall))}
-.rib{position:absolute;display:block;max-width:none}
 .work{position:absolute;padding:0;text-align:right;transform-style:flat;color:var(--ink)}
 .work .fr{position:absolute;inset:0;background:#fff;padding:12px;border-radius:8px;box-shadow:0 0 0 5px color-mix(in srgb,var(--deep) 78%,#fff),0 30px 60px #2d1f7a4d;transition:box-shadow .25s}
 .work .fr img{width:100%;height:100%;object-fit:contain;display:block;border-radius:3px}
@@ -124,8 +114,7 @@ h1,h2,h3,p,dl,dd{margin:0}
 .sign::after{right:auto;left:18%}
 .sign.big::before,.sign.big::after{display:none}
 .sign.big{font-weight:700;font-size:58px;padding:20px 54px 26px}
-.halo,.seg,.seg *,.sign,.rib{pointer-events:none}
-.exit{position:absolute;clip-path:var(--arch);background:linear-gradient(#fff,#f4f0ff);font-weight:300;font-size:22px;display:grid;place-content:center;gap:14px;padding:20% 8% 6%;text-align:center}
+.halo,.seg,.seg *,.sign,.exit{position:absolute;clip-path:var(--arch);background:linear-gradient(#fff,#f4f0ff);font-weight:300;font-size:22px;display:grid;place-content:center;gap:14px;padding:20% 8% 6%;text-align:center}
 .exit a{background:linear-gradient(100deg,#6d8df2,#8a63e6);color:#fff;border-radius:26px;padding:16px 34px;font-weight:600;font-size:22px;line-height:1.5}
 .exit a small{display:block;font-weight:300;font-size:14px}
 .exit a.alt{background:none;color:var(--ink);font-weight:400;font-size:15px}
@@ -170,7 +159,8 @@ dialog::backdrop{background:#e6ddffcc}
 .g-list li span{font-size:13px;font-weight:300;white-space:nowrap}
 .muted{color:var(--soft);font-weight:300}
 .zt{font-weight:600;font-size:24px;margin:36px 0 14px}
-.mas{columns:4 210px;column-gap:18px}
+.mas{display:flex;gap:18px;align-items:flex-start}
+.mas>div{flex:1}
 .mas button{display:block;width:100%;break-inside:avoid;margin:0 0 18px;padding:0;background:#fff;text-align:right;border-radius:18px;overflow:hidden;box-shadow:0 8px 26px #4a36a51a;transition:box-shadow .25s}
 .mas button:hover{box-shadow:0 0 0 3px var(--violet)}
 .mas img{display:block;width:100%;height:auto}
@@ -225,7 +215,7 @@ dialog::backdrop{background:#e6ddffcc}
   .hall-bottom{gap:10px}.step{width:48px;height:48px}
   .sign.big::before,.sign.big::after{display:none}
 .sign.big{font-size:32px;padding:14px 28px 18px}.sign{font-size:19px;padding:10px 22px}
-  .mas{columns:2 140px;column-gap:12px}.mas span{padding:9px 12px;font-size:13px}
+  .mas{gap:12px}.mas span{padding:9px 12px;font-size:13px}
   .v-top strong{font-size:17px}.v-pages button,.v-nav button{padding:0 14px;font-size:13px}
 }
 @media(max-height:560px){.intro h1{font-size:clamp(44px,17vh,100px)}.credits{display:none}}
@@ -252,19 +242,15 @@ dialog::backdrop{background:#e6ddffcc}
 }
 @media(max-width:350px){.enter,.ghost{font-size:15px;padding:0 18px}.ghost{padding:0 8px}}
 /* أبواب البهو على الجوال */
-.lobby.port .door>.in{inset:22px 22px 0}
-.lobby.port .plate{padding:26px 22px 34px}
-.lobby.port .plate b{font-size:62px}
-.lobby.port .plate.long b{font-size:46px}
-.lobby.port .plate span{font-size:32px;line-height:1.5}
-.lobby.port .plate i{font-size:27px}
-.lobby.port .hang{padding:8px;border-radius:10px}
-.lobby.port .hang u{font-size:25px;padding:0 18px;right:14px;top:14px}
-.lobby.port .hang em{font-size:32px}
+.lobby.port .plate{padding:10px 8px 13px}
+.lobby.port .plate b{font-size:24px}
+.lobby.port .plate.long b{font-size:18px}
+.lobby.port .plate span{font-size:13px;line-height:1.55;margin:0}
+.lobby.port .plate i{font-size:11.5px}
+.lobby.port .hang{padding:3px;border-radius:2px}
+.lobby.port .hang u{font-size:11px;padding:0 8px;right:5px;top:5px}
+.lobby.port .hang em{font-size:13px}
 @media(max-width:400px){.bar{gap:4px}.bar nav{gap:0}.bar nav button{padding:0 7px;white-space:nowrap}.brand{gap:7px;font-size:15px}}
-.lobby.port .bay-wall{background:linear-gradient(#fff,#efeaff 50%,#dcd3fc)}
-.lobby.port .door{background:linear-gradient(90deg,#c3b4f7,#fff 10% 90%,#c3b4f7)}
-
 /* ===== النمط الرقمي ===== */
 :root{--cut:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);--hex:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0 50%);--tech:4px 18px 4px 18px}
 .mark{width:24px;height:24px;clip-path:var(--hex)}
@@ -277,35 +263,25 @@ dialog::backdrop{background:#e6ddffcc}
 .step:disabled{background:linear-gradient(140deg,#b9c6f5,#cdbcf2);color:#fff;opacity:.8}
 .x,#vX{background:linear-gradient(140deg,#6d8df2,#8a63e6);color:#fff}
 /* البوابات */
-.bay-wall,.lobby.port .bay-wall{background:var(--trace2),linear-gradient(#fdfcff,#f0ebff 55%,#ddd5fb)}
-.bay-wall::before,.bay-wall::after{width:8px;background:linear-gradient(#8fb0ff00,#6d8df2 20%,#9a5cf0 80%,#9a5cf000);box-shadow:0 0 34px 6px #8a63e65c}
 .door,.lobby.port .door,.gate{background:linear-gradient(160deg,#5f8cff,#a45cf5)}
 .door>.in{inset:5px 5px 0;background:linear-gradient(#ffffff66 1px,transparent 1px) 0 0/34px 34px,linear-gradient(90deg,#ffffff66 1px,transparent 1px) 0 0/34px 34px,linear-gradient(170deg,#fff,var(--wall) 30%,var(--wall2))}
-.lobby.port .door>.in{inset:8px 8px 0}
 .gate>.in{inset:4px 4px 0;background:linear-gradient(#ffffff66 1px,transparent 1px) 0 0/26px 26px,linear-gradient(90deg,#ffffff66 1px,transparent 1px) 0 0/26px 26px,linear-gradient(170deg,#fff,var(--wall) 30%,var(--wall2))}
 .door>.in::before{inset:auto 0;top:0;height:26%;clip-path:none;background:linear-gradient(#ffffff00,#ffffffb8 96%,var(--deep) 97%,#ffffff00);animation:scan 5.5s linear infinite;opacity:.75}
 @keyframes scan{from{transform:translateY(-100%)}to{transform:translateY(400%)}}
 .door>.in::after{content:"";position:absolute;left:50%;top:8.2%;width:128px;height:118px;transform:translateX(-50%);clip-path:var(--hex);background:#ffffffc4}
-.lobby.port .door>.in::after{width:200px;height:184px;top:7%}
 .door .ico{z-index:1;top:11.4%}
 .lobby.port .door .ico{top:10.6%}
 .door.soon>.in::after{top:34%;width:210px;height:194px}
-.lobby.port .door.soon>.in::after{top:33%;width:330px;height:300px}
 .door.soon{background:linear-gradient(160deg,#c3c9e8,#cdc3e6)}
 .door.soon .ico,.lobby.port .door.soon .ico{top:38.5%}
 .in .hang{border-radius:3px;padding:4px;box-shadow:0 0 0 1.5px color-mix(in srgb,var(--deep) 60%,#fff),0 10px 26px color-mix(in srgb,var(--deep) 40%,transparent)}
-.lobby.port .hang{border-radius:4px;padding:6px}
 .hang u,.work .badge{border-radius:2px 9px 2px 9px}
 .in .plate{background:#ffffffe8;border-top:3px solid var(--deep)}
-.disc{background:repeating-radial-gradient(circle,#7d6cf000 0 118px,#7d6cf055 118px 121px),repeating-conic-gradient(from 18deg,#7d6cf050 0 .35deg,#7d6cf000 .35deg 9deg),radial-gradient(circle,#fff 0,#ebe6ff 45%,#d3cafa)}
 /* صفحة القسم */
 .wing{background:var(--trace2),linear-gradient(200deg,#fff,var(--wall) 45%,var(--wall2));background-attachment:local}
 .zlist a{border-radius:var(--tech);border:1.5px solid #ffffff;background:#ffffffb8}
 .zlist img,.zlist .strip em{border-radius:3px 10px 3px 10px}
 /* القاعة */
-.pl.w{background-image:linear-gradient(90deg,#ffffffd9 3px,transparent 3px),linear-gradient(transparent 49.7%,#ffffffb0 49.7% 50.1%,transparent 50.1%),var(--trace),linear-gradient(#fff,var(--wall) 26%,var(--wall2) 94%,var(--deep) 94%,var(--deep) 95%,#fff 95%);background-size:420px 100%,auto,auto,auto}
-.pl.f{background-image:linear-gradient(color-mix(in srgb,var(--deep) 40%,transparent) 2px,transparent 2px),linear-gradient(90deg,color-mix(in srgb,var(--deep) 40%,transparent) 2px,transparent 2px),linear-gradient(90deg,var(--wall2),#fbfaff 34% 66%,var(--wall2));background-size:130px 130px,130px 130px,auto;background-position:center top;opacity:1}
-.pl.c{background:linear-gradient(90deg,var(--wall2),#fff 22%,#fff 33%,var(--deep) 33.3% 33.9%,#fff 34.2%,#f4f1ff 50%,#fff 65.800%,var(--deep) 66.100% 66.700%,#fff 67%,#fff 78%,var(--wall2))}
 .work .fr{border-radius:2px;padding:10px;box-shadow:0 0 0 2px color-mix(in srgb,var(--deep) 55%,#fff),0 0 54px color-mix(in srgb,var(--deep) 42%,transparent),0 26px 50px #2d1f7a3d}
 .work .fr img{border-radius:0}
 .work .fr::after{content:"";position:absolute;inset:-18px;pointer-events:none;--b:var(--deep);background:linear-gradient(var(--b) 0 0) 0 0/46px 4px,linear-gradient(var(--b) 0 0) 0 0/4px 46px,linear-gradient(var(--b) 0 0) 100% 0/46px 4px,linear-gradient(var(--b) 0 0) 100% 0/4px 46px,linear-gradient(var(--b) 0 0) 0 100%/46px 4px,linear-gradient(var(--b) 0 0) 0 100%/4px 46px,linear-gradient(var(--b) 0 0) 100% 100%/46px 4px,linear-gradient(var(--b) 0 0) 100% 100%/4px 46px;background-repeat:no-repeat;transition:inset .25s}
@@ -324,3 +300,13 @@ dialog::backdrop{background:#e6ddffcc}
 .v-body video{border-radius:4px}
 .credits div{border-inline-start:3px solid #8a63e6;padding-inline-start:12px}
 @media(max-width:760px){.step{width:54px;height:50px}.work .fr::after{inset:-11px;background-size:26px 3px,3px 26px,26px 3px,3px 26px,26px 3px,3px 26px,26px 3px,3px 26px}.work:hover .fr::after{inset:-13px}.work .cap{top:calc(100% + 22px)}.credits div{border:0;padding:0}}
+/* خفة على الجوال */
+.env{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+body.dlg .stage{display:none}
+body.dlg .wing{visibility:hidden}
+.lobby.port .door>.in{inset:4px 4px 0}
+.lobby.port .door>.in::after{width:78px;height:72px;top:7%}
+.lobby.port .door.soon>.in::after{width:128px;height:118px;top:33%}
+.mas img{background:#f1edff}
+@media(max-width:1100px),(hover:none){.door>.in::before{display:none}.work .halo{display:none}.work .fr{box-shadow:0 0 0 2px color-mix(in srgb,var(--deep) 55%,#fff),0 14px 30px #2d1f7a3d}.mas button{box-shadow:0 2px 10px #4a36a51f}.wing{background-attachment:scroll}}
+@media(min-width:600px){.lobby.port .plate b{font-size:38px}.lobby.port .plate.long b{font-size:29px}.lobby.port .plate span{font-size:20px}.lobby.port .plate i{font-size:17px}.lobby.port .hang u{font-size:16px}.lobby.port .door>.in::after{width:128px;height:118px}.lobby.port .door .ico{width:74px;height:74px}}

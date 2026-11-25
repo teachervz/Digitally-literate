@@ -36,7 +36,7 @@ function covers(lists,n){const mixd=[];for(let i=0,m=Math.max(...lists.map(l=>l.
   for(const x of pool){if(out.length>=n)break;if(!out.includes(x))out.push(x)}
   return out}
 const SLOTS={1:[[13,29,74,40]],2:[[13,28,74,21],[13,51,74,21]],3:[[9,28,82,23],[9,53,39,19],[52,53,39,19]],4:[[9,28,39,21.5],[52,28,39,21.5],[9,52,39,20],[52,52,39,20]]};
-const hang=its=>its.map((x,i)=>{const p=SLOTS[its.length][i];return `<span class="hang" style="left:${p[0]}%;top:${p[1]}%;width:${p[2]}%;height:${p[3]}%">${x.th?`<img src="${x.th}" alt="" draggable="false">`:`<em>${esc(x.host)}</em>`}${KTAG[x.k]?`<u>${KTAG[x.k]}</u>`:''}</span>`}).join('');
+const hang=its=>its.map((x,i)=>{const p=SLOTS[its.length][i];return `<span class="hang" style="left:${p[0]}%;top:${p[1]}%;width:${p[2]}%;height:${p[3]}%">${x.th?`<img src="${innerWidth<=760?x.th.replace('/thumb/','/sm/'):x.th}" alt="" draggable="false">`:`<em>${esc(x.host)}</em>`}${KTAG[x.k]?`<u>${KTAG[x.k]}</u>`:''}</span>`}).join('');
 const setPal=w=>{root.style.setProperty('--wall',w.pal[0]);root.style.setProperty('--wall2',w.pal[1]);root.style.setProperty('--deep',w.pal[2])};
 
 $('lead').textContent=E.lead;
@@ -93,25 +93,62 @@ function wipe(color,mid){if(calm||document.hidden){mid();return}const my=++wipin
       wx.fillStyle=color;wx.fillRect(i*cw,y,cw+1,hh);if(p<1){wx.fillStyle=i%3?'#8a63e6':'#5f86ea';wx.fillRect(i*cw,(t<1.1)===!!up?y:y+hh-3,cw+1,3)}}
     if(t<2.3)requestAnimationFrame(f);else wx.clearRect(0,0,W,HH)})()}
 
+/* ---------- رسم البيئة على لوحة واحدة (خفيف على ذاكرة الجوال) ---------- */
+const hex=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16));
+const rgba=(s,o)=>`rgba(${hex(s).join(',')},${o})`;
+const blend=(x,y,t)=>{const A=hex(x),B=hex(y);return `rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')})`};
+function Env(id){const cv=$(id),g=cv.getContext('2d');let W=0,HH=0,P=1,cx=0,cy=0,co=1,si=0,oz=0,oy=0,near=1;
+  return {g,cv,size(){W=innerWidth;HH=innerHeight;const q=Math.min(1.6,devicePixelRatio||1);cv.width=Math.round(W*q);cv.height=Math.round(HH*q);this.q=q},
+    free(){cv.width=cv.height=1},
+    cam(p,yaw,z,y,n){P=p;co=Math.cos(yaw);si=Math.sin(yaw);oz=z;oy=y;near=n;cx=W/2;cy=HH/2;g.setTransform(this.q,0,0,this.q,0,0)},
+    W:()=>W,H:()=>HH,
+    view(X,Y,Z){const z=Z-oz;return [X*co+z*si,Y+oy,X*si-z*co]},
+    scr(v){const k=P/v[2];return [cx+v[0]*k,cy+v[1]*k]},
+    clip(pts,closed){const V=pts.map(p=>this.view(p[0],p[1],p[2])),o=[],n=V.length;for(let i=0;i<n;i++){const A=V[i],ok=A[2]>near;if(ok)o.push(A);if(i===n-1&&!closed)break;const B=V[(i+1)%n];if(ok!==(B[2]>near)){const t=(near-A[2])/(B[2]-A[2]);o.push([A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,near])}}return o.map(v=>this.scr(v))},
+    path(pts,closed){const q=this.clip(pts,closed);if(q.length<2)return false;q.forEach((p,i)=>g[i?'lineTo':'moveTo'](p[0],p[1]));if(closed)g.closePath();return true},
+    poly(pts,fill){g.beginPath();if(this.path(pts,true)){g.fillStyle=fill;g.fill()}},
+    line(pts){g.beginPath();if(this.path(pts,false))g.stroke()},
+    depth(X,Y,Z){return this.view(X,Y,Z)[2]}}}
+const CIR=[[[40,60],[130,60],[160,90],[230,90]],[[300,60],[410,60],[460,110],[500,110]],[[70,420],[70,340],[120,290],[160,290],[200,250]],[[330,220],[370,260],[370,360],[390,400]],[[470,430],[470,340],[510,300],[520,300]],[[60,180],[120,180],[150,150]]];
+
 /* ---------- البهو الدائري ---------- */
 const ring=$('ring'),N=WINGS.length,STEP=360/N;let la=0,lt=0,lobOn=false;
 const glimpse=w=>w.teachers.length?hang(covers(w.teachers.map(t=>t.items),4)):'';
 /* على الجوال: أبواب أعرض وزاوية رؤية أوسع، فتظهر حافتا القسمين المجاورين يمينًا ويسارًا */
 const lobPort=()=>innerWidth<=1100&&innerHeight>innerWidth;
-const lobK=()=>innerWidth*1/1000;
-function buildLobby(){const port=lobPort(),k=lobK(),R=1000,seg=2*R*Math.tan(Math.PI/N),floor=port?(innerHeight/2-132)/k:340,dw=port?600:450,
-  dh=port?Math.min(innerHeight-236,innerWidth*1.36)/k:720,top=port?-(innerHeight/2)/k-300:-700,H=floor-top;
-  $('lobby').classList.toggle('port',port);
-  ring.innerHTML=`<div class="disc" style="width:2300px;height:2300px;left:-1150px;top:${floor-1150}px;transform:rotateX(90deg)"></div>`+WINGS.map((w,i)=>{
+const LE=Env('lobEnv');let LB=null;
+function buildLobby(){const port=lobPort(),R=port?innerWidth:1000,floor=port?innerHeight/2-132:340,dw=port?Math.round(innerWidth*.6):450,
+  dh=port?Math.round(Math.min(innerHeight-236,innerWidth*1.36)):720;
+  $('lobby').classList.toggle('port',port);LE.size();LB={port,R,floor,top:port?-innerHeight:-700,key:''};
+  ring.innerHTML=WINGS.map((w,i)=>{
     const soon=!w.teachers.length,names=w.teachers.map(t=>t.name).filter(n=>!/أعمال القسم/.test(n));
     return `<div class="bay" data-i="${i}" style="transform:rotateY(${i*STEP}deg) translateZ(${-R}px);--wall:${w.pal[0]};--wall2:${w.pal[1]};--deep:${w.pal[2]}">
-      <div class="bay-wall" style="left:${-seg/2-1}px;top:${top}px;width:${seg+2}px;height:${H}px"></div>
-      <a class="door${soon?' soon':''}" href="${soon?'#/lobby':'#/wing/'+w.id}" draggable="false" style="left:${-dw/2}px;top:${floor-dh}px;width:${dw}px;height:${dh}px;transform:translateZ(2px)" aria-label="${esc('جناح '+w.name+(soon?'، يفتتح قريبًا':''))}"><span class="in">${icon(w.icon,(soon?130:76)*(port?1.5:1))}${glimpse(w)}<span class="plate${w.name.length>14?' long':''}"><b>${esc(w.name)}</b><span>${soon?'يُفتتح قريبًا':esc(names.join('، '))}</span>${soon?'':`<i>${inside(w.teachers.flatMap(t=>t.items))}</i>`}</span></span></a></div>`}).join('')}
-function lobFrame(){if(!lobOn)return;la+=(lt-la)*(calm?1:.09);if(Math.abs(lt-la)<.001)la=lt;const port=lobPort(),s=port?1:Math.min(innerHeight/900,1.25),p=port?lobK()*1000:820*s;
-  ring.style.transform=`perspective(${p}px) translateZ(${p}px) scale3d(${s},${s},${s}) translateY(${port?0:40}px) rotateY(${-la*STEP}deg)`;
-  ring.querySelectorAll('.bay').forEach((b,i)=>{let a=((i-la)*STEP+540)%360-180;if(a<-180)a+=360;b.style.visibility=Math.abs(a)<82?'visible':'hidden'});
-  const cur=((Math.round(la)%N)+N)%N;if(cur!==lobFrame.c){lobFrame.c=cur;const w=WINGS[cur];$('lobNow').innerHTML=`${esc(w.name)}<small>${w.teachers.length?count(w.teachers.length,'قاعة واحدة','قاعتان','قاعات','قاعة')+' و'+nWorks(w.count):'يُفتتح قريبًا'}</small>`}
-  requestAnimationFrame(lobFrame)}
+      <a class="door${soon?' soon':''}" href="${soon?'#/lobby':'#/wing/'+w.id}" draggable="false" style="left:${-dw/2}px;top:${floor-dh}px;width:${dw}px;height:${dh}px;transform:translateZ(2px)" aria-label="${esc('جناح '+w.name+(soon?'، يفتتح قريبًا':''))}"><span class="in">${icon(w.icon,port?(soon?76:46):(soon?130:76))}${glimpse(w)}<span class="plate${w.name.length>14?' long':''}"><b>${esc(w.name)}</b><span>${soon?'يُفتتح قريبًا':esc(names.join('، '))}</span>${soon?'':`<i>${inside(w.teachers.flatMap(t=>t.items))}</i>`}</span></span></a></div>`}).join('')}
+function drawLobby(p,ty){const g=LE.g,{R,floor,top}=LB,yaw=-la*STEP*Math.PI/180,W=LE.W(),HH=LE.H();LE.cam(p,yaw,0,ty,R*.06);
+  const bg=g.createLinearGradient(0,0,0,HH);bg.addColorStop(0,'#fdfcff');bg.addColorStop(.5,'#f0ebff');bg.addColorStop(1,'#d3cafa');g.globalAlpha=1;g.fillStyle=bg;g.fillRect(0,0,W,HH);
+  const fy=HH/2+(floor+ty)*p/R,fl=g.createLinearGradient(0,fy-10,0,HH);fl.addColorStop(0,'#efeaff');fl.addColorStop(1,'#cabffa');
+  const ph=Math.PI/N,rc=R/Math.cos(ph),at=(q,rr,y)=>[-Math.sin(q)*rr,y,-Math.cos(q)*rr];
+  /* الأرضية */
+  const rim=[];for(let i=0;i<=N;i++){const q=(i-.5)*2*ph;rim.push(at(q,rc,floor))}
+  LE.poly(rim.slice(0,N),fl);
+  g.lineWidth=1.5;g.strokeStyle='#7d6cf0';g.globalAlpha=.3;for(const f of [.38,.52,.66,.8,.94]){const pts=[];for(let i=0;i<=60;i++)pts.push(at(i/60*Math.PI*2,R*f,floor));LE.line(pts)}
+  g.globalAlpha=.24;for(let i=0;i<40;i++){const q=i/40*Math.PI*2;LE.line([at(q,R*.38,floor),at(q,R*.98,floor)])}
+  /* الجدران ونقش الدوائر */
+  const wall=g.createLinearGradient(0,0,0,fy);wall.addColorStop(0,'#fdfcff');wall.addColorStop(1,'#e2dafc');
+  const half=R*Math.tan(ph),u=half*2/560;
+  for(let i=0;i<N;i++){const q=i*2*ph,d=LE.depth(...at(q,R,0));if(d<R*.12)continue;
+    const L=at(q+ph,rc,0),Rr=at(q-ph,rc,0),pt=(x,y)=>{const t=x/560;return [L[0]+(Rr[0]-L[0])*t,y,L[2]+(Rr[2]-L[2])*t]};
+    g.globalAlpha=1;LE.poly([pt(0,top),pt(560,top),pt(560,floor),pt(0,floor)],wall);
+    g.strokeStyle='#6a5be8';g.fillStyle='#6a5be8';g.lineWidth=1.4;for(let rp=0;rp<3;rp++)for(const c of CIR){const y0=floor-(rp+1)*480*u;if(y0+480*u<top)continue;g.globalAlpha=.2;LE.line(c.map(([x,y])=>pt(x,y0+y*u)));g.globalAlpha=.32;for(const e of [c[0],c[c.length-1]]){const v=LE.view(...pt(e[0],y0+e[1]*u));if(v[2]>R*.1){const s=LE.scr(v);g.beginPath();g.arc(s[0],s[1],Math.max(1.4,4*u*p/v[2]),0,7);g.fill()}}}}
+  /* أعمدة LED */
+  for(let i=0;i<N;i++){const q=(i+.5)*2*ph,A=at(q,rc,top),B=at(q,rc,floor);if(LE.depth(...A)<R*.1)continue;const sA=LE.scr(LE.view(...A)),sB=LE.scr(LE.view(...B)),lg=g.createLinearGradient(0,Math.max(0,sA[1]),0,sB[1]);lg.addColorStop(0,'rgba(109,141,242,0)');lg.addColorStop(.3,'#6d8df2');lg.addColorStop(1,'#9a5cf0');g.strokeStyle=lg;const z=p/LE.depth(...A)*R/1000*(LB.port?2:1);
+    g.globalAlpha=.14;g.lineWidth=46*z;LE.line([A,B]);g.globalAlpha=.2;g.lineWidth=22*z;LE.line([A,B]);g.globalAlpha=1;g.lineWidth=6*z;LE.line([A,B])}
+  g.globalAlpha=1}
+function lobFrame(){if(!lobOn)return;requestAnimationFrame(lobFrame);if(frozen())return;la+=(lt-la)*(calm?1:.09);if(Math.abs(lt-la)<.001)la=lt;const port=LB.port,s=port?1:Math.min(innerHeight/900,1.25),p=port?LB.R:820*s,ty=port?0:40,key=la+'|'+LB.R+'|'+innerHeight;
+  if(key!==LB.key){LB.key=key;ring.style.transform=`perspective(${p}px) translateZ(${p}px) scale3d(${s},${s},${s}) translateY(${ty}px) rotateY(${-la*STEP}deg)`;
+    const lim=port?56:80;for(const b of ring.children){let a=((b.dataset.i-la)*STEP+540)%360-180;if(a<-180)a+=360;b.style.display=Math.abs(a)<lim?'':'none'}
+    drawLobby(p/s*s,ty)}
+  const cur=((Math.round(la)%N)+N)%N;if(cur!==lobFrame.c){lobFrame.c=cur;const w=WINGS[cur];$('lobNow').innerHTML=`${esc(w.name)}<small>${w.teachers.length?count(w.teachers.length,'قاعة واحدة','قاعتان','قاعات','قاعة')+' و'+nWorks(w.count):'يُفتتح قريبًا'}</small>`}}
 /* التالي على اليسار كما في القراءة العربية */
 const lobGo=d=>{lt=Math.round(lt)+d};
 $('lobNext').onclick=()=>lobGo(1);$('lobPrev').onclick=()=>lobGo(-1);
@@ -133,7 +170,7 @@ ring.addEventListener('click',e=>{const b=e.target.closest('.bay');if(!b||!lobPo
 function renderWing(w){setPal(w);const el=$('wing');el.innerHTML=`<div class="wing-head"><div><a class="back" href="#/lobby">→ عودة للرئيسية</a><h2>${esc(w.name)}</h2></div>${icon(w.icon,innerWidth<760?64:120)}</div>`+w.teachers.map(t=>{
   const c=covers([t.items],4);
   return `<article class="room"><a class="gate" href="${tURL(t)}" aria-label="${esc('ادخلي قاعة '+t.name)}"><span class="in">${hang(c)}<span class="go">ادخلي القاعة</span></span></a>
-  <div><h3>${esc(t.name)}</h3><p class="role">${esc(t.role)}، ${nWorks(t.items.length)}: ${inside(t.items)}</p><ul class="zlist">${t.zones.map(z=>`<li><a href="${tURL(t,z.start+1)}"><span><b>${esc(z.t)}</b><small>${inside(z.items)}</small></span><span class="strip">${z.items.slice(0,5).map(x=>x.th?`<img src="${x.th}" alt="">`:`<em>${esc(x.host)}</em>`).join('')}${z.items.length>5?`<em>+${ar(z.items.length-5)}</em>`:''}</span></a></li>`).join('')}</ul></div></article>`}).join('');el.scrollTop=0}
+  <div><h3>${esc(t.name)}</h3><p class="role">${esc(t.role)}، ${nWorks(t.items.length)}: ${inside(t.items)}</p><ul class="zlist">${t.zones.map(z=>`<li><a href="${tURL(t,z.start+1)}"><span><b>${esc(z.t)}</b><small>${inside(z.items)}</small></span><span class="strip">${z.items.slice(0,5).map(x=>x.th?`<img src="${x.th.replace('/thumb/','/sm/')}" alt="">`:`<em>${esc(x.host)}</em>`).join('')}${z.items.length>5?`<em>+${ar(z.items.length-5)}</em>`:''}</span></a></li>`).join('')}</ul></div></article>`}).join('');el.scrollTop=0}
 
 /* ---------- الرواق ---------- */
 const hs=$('hallStage'),hw=$('hallWorld');let H=null,ht=0,hp=0,hallOn=false,touring=0,tourT=0;
@@ -142,16 +179,8 @@ function badge(it){return it.k==='pdf'?`PDF ${ar(it.n)} ${it.n>10||it.n<3?'صف�
 function buildHall(t,at){const vw=innerWidth,vh=innerHeight,port=vw<vh*.9;
   const P=Math.max(vh*.95,vw*.72),BW=port?vw*.76:Math.min(vw*.46,820),BH=vh*(port?.44:.5),th=(port?24:30)*Math.PI/180,X=Math.sin(th)*P,dd=Math.cos(th)*P,step=P*(port?.85:.72),half=X+BW*.5+30,yF=vh*.43,yC=-vh*.74,first=P*1.5;
   const n=t.items.length,segL=step*2,len=first+n*step+P*1.6,S=Math.ceil(len/segL)+1;
-  let h='';
-  const rp=gatePts(),ribW=half*2,ribH=yF-yC;
-  const hole=rp.map(([x,y])=>[(x*.9+5)*ribW/100,(y*.94+6)*ribH/100]);hole[0][1]=hole[hole.length-1][1]=ribH+2;
-  const hd='M'+hole.map(p=>p.map(v=>v.toFixed(1)).join(' ')).join('L'),dc=t.wing.pal[2];
-  const rib=`<svg class="rib" width="${ribW}" height="${ribH}" viewBox="0 0 ${ribW} ${ribH}" style="left:${-half}px;top:${yC}px"><path fill="#f8f6ff" fill-rule="evenodd" d="M0 0H${ribW}V${ribH}H0Z ${hd}Z"/><path fill="none" stroke="${dc}" stroke-opacity=".16" stroke-width="22" d="${hd}"/><path fill="none" stroke="${dc}" stroke-opacity=".85" stroke-width="4" d="${hd}"/><g fill="${dc}">${hole.slice(1,-1).map(p=>`<rect x="${p[0]-7}" y="${p[1]-7}" width="14" height="14" rx="3"/>`).join('')}</g></svg>`;
-  for(let i=0;i<S;i++){const z=P*.6-i*segL;h+=`<div class="seg" data-z="${z}" style="transform:translateZ(${z}px)">
-    <div class="pl w" style="left:${-segL/2}px;top:${yC}px;width:${segL+2}px;height:${ribH}px;transform:translate3d(${-half}px,0,${-segL/2}px) rotateY(90deg)"></div>
-    <div class="pl w" style="left:${-segL/2}px;top:${yC}px;width:${segL+2}px;height:${ribH}px;transform:translate3d(${half}px,0,${-segL/2}px) rotateY(-90deg)"></div>
-    <div class="pl f" style="left:${-half}px;top:${-segL/2}px;width:${ribW}px;height:${segL+2}px;transform:translate3d(0,${yF}px,${-segL/2}px) rotateX(90deg)"></div>
-    <div class="pl c" style="left:${-half}px;top:${-segL/2}px;width:${ribW}px;height:${segL+2}px;transform:translate3d(0,${yC}px,${-segL/2}px) rotateX(-90deg)"></div>${rib}</div>`}
+  let h='';const ribW=half*2,ribH=yF-yC;
+  const hole=gatePts().map(([x,y])=>[(x*.9+5)*ribW/100-half,yC+(y*.94+6)*ribH/100]);hole[0][1]=hole[hole.length-1][1]=yF;
   const stops=[{z:P*.35,yaw:0}];
   h+=`<div class="sign big obj" data-z="${-P*.95}" style="transform:translate(-50%,-50%) translate3d(0,${-vh*.16}px,${-P*.95}px)">${esc(t.name)}<small>${esc(t.role)}، ${nWorks(n)}</small></div>`;
   t.items.forEach((it,i)=>{const z=-(first+i*step),side=i%2?-1:1,r=it.w/it.h,bw=Math.min(BW,BH*r),bh=bw/r,x=side*X;
@@ -163,24 +192,53 @@ function buildHall(t,at){const vw=innerWidth,vh=innerHeight,port=vw<vh*.9;
   const ew=Math.min(vw*.8,560),eh=vh*.74;
   h+=`<div class="exit obj" data-z="${ze}" style="width:${ew}px;height:${eh}px;left:${-ew/2}px;top:${yF-eh-4}px;transform:translateZ(${ze}px)"><span>نهاية القاعة</span><a href="${tURL(next)}">قاعة ${esc(next.name)}<small>${esc(next.wing.name)}</small></a><a class="alt" href="#/lobby">العودة للرئيسية</a></div>`;
   hw.innerHTML=h;
-  H={t,P,stops,step,segL,segs:[...hw.querySelectorAll('.seg')],objs:[...hw.querySelectorAll('.obj')]};
-  ht=hp=clamp(at,0,stops.length-1)}
+  H={t,P,stops,step,segL,half,yF,yC,hole,pal:t.wing.pal,far:segL*(port?2.3:3.2),key:'',objs:[...hw.querySelectorAll('.obj')]};H.objs.forEach(o=>{o._on=false;o.style.display='none'});
+  HE.size();ht=hp=clamp(at,0,stops.length-1)}
+const HE=Env('hallEnv');
+function drawHall(z,yaw,bob){const g=HE.g,{P,half:X,yF,yC,segL,hole,pal:[w1,w2,dp]}=H,W=HE.W(),HH=HE.H();HE.cam(P,yaw,z,bob,P*.03);
+  const vx=W/2-Math.tan(yaw)*P,vy=HH/2+bob,D=segL*4.6,zf=z-D,zn=z-P*.03,at=f=>z-D*f;
+  g.globalAlpha=1;g.fillStyle='#fff';g.fillRect(0,0,W,HH);
+  const fog=(x1,y1,c0,c1,c2)=>{const q=g.createLinearGradient(vx,vy,x1,y1);q.addColorStop(0,'#ffffff');q.addColorStop(.12,c0);q.addColorStop(.45,c1);q.addColorStop(1,c2);return q};
+  const kx=X*P/(P*.9);
+  HE.poly([[-X,yC,zn],[X,yC,zn],[X,yC,zf],[-X,yC,zf]],fog(vx,vy+yC*1.1,'#ffffff','#fcfaff',blend(w1,'#ffffff',.45)));
+  HE.poly([[-X,yF,zn],[X,yF,zn],[X,yF,zf],[-X,yF,zf]],fog(vx,vy+yF*1.5,'#ffffff','#fbf9ff',blend(w2,'#ffffff',.45)));
+  for(const sd of [-1,1]){const Xs=sd*X,wl=fog(vx+sd*kx*1.5,vy,blend(w1,'#ffffff',.6),w1,w2);
+    HE.poly([[Xs,yC,zn],[Xs,yF,zn],[Xs,yF,zf],[Xs,yC,zf]],wl);
+    const hgt=yF-yC;HE.poly([[Xs,yC,zn],[Xs,yC+hgt*.2,zn],[Xs,yC+hgt*.2,zf],[Xs,yC,zf]],'rgba(255,255,255,.4)');
+    HE.poly([[Xs,yF-hgt*.055,zn],[Xs,yF,zn],[Xs,yF,zf],[Xs,yF-hgt*.055,zf]],'rgba(255,255,255,.95)');
+    HE.poly([[Xs,yF-hgt*.066,zn],[Xs,yF-hgt*.055,zn],[Xs,yF-hgt*.055,zf],[Xs,yF-hgt*.066,zf]],dp);
+    HE.poly([[Xs,yC+hgt*.497,zn],[Xs,yC+hgt*.503,zn],[Xs,yC+hgt*.503,zf],[Xs,yC+hgt*.497,zf]],'rgba(255,255,255,.6)')}
+  /* إضاءة السقف */
+  for(const sd of [-1,1]){const l=sd*X*.34,t=X*.014;g.globalAlpha=.16;HE.poly([[l-t*5,yC,zn],[l+t*5,yC,zn],[l+t*5,yC,zf],[l-t*5,yC,zf]],dp);g.globalAlpha=.9;HE.poly([[l-t,yC,zn],[l+t,yC,zn],[l+t,yC,zf],[l-t,yC,zf]],dp)}
+  /* شبكة الأرضية */
+  g.strokeStyle=dp;g.lineWidth=1.2;const cell=X*.2;g.globalAlpha=.26;for(let i=-5;i<=5;i++)HE.line([[i*cell,yF,zn],[i*cell,yF,z-D*.5]]);
+  for(let q=Math.floor(z/cell)*cell;q>z-D*.55;q-=cell){const k=(z-q)/(D*.55);g.globalAlpha=.34*(1-k);HE.line([[-X,yF,q],[X,yF,q]])}
+  /* نقش الدوائر على الجدران */
+  const u=(yF-yC)/960,tw=560*u;g.lineCap='round';
+  for(let b=Math.ceil(z/tw);b>(z-D*.62)/tw;b--){const z0=b*tw,k=clamp((z-z0)/(D*.62),0,1);for(const sd of [-1,1])for(let rw=0;rw<2;rw++)for(const c of CIR){const pt=c.map(([x,y])=>[sd*X,yC+(y+rw*480)*u,z0-x*u]);g.globalAlpha=.42*(1-k);g.strokeStyle=dp;g.lineWidth=1.6;HE.line(pt);
+    g.fillStyle=dp;for(const e of [pt[0],pt[pt.length-1]]){const v=HE.view(...e);if(v[2]>P*.12){const s=HE.scr(v);g.globalAlpha=.6*(1-k);g.beginPath();g.arc(s[0],s[1],Math.max(1.2,5*u*P/v[2]),0,7);g.fill()}}}}
+  g.lineCap='butt';
+  /* بوابات القاعة من البعيد إلى القريب */
+  const z0=P*.6;for(let i=Math.floor((z0-zf)/segL);i>=0;i--){const gz=z0-i*segL,k=z-gz;if(k<P*.14||k>D)continue;const pts=hole.map(([x,y])=>[x,y,gz]);if([[-X,yC],[X,yC],[X,yF],[-X,yF]].some(([x,y])=>HE.depth(x,y,gz)<P*.05))continue;
+    const al=clamp((D-k)/(D*.5),0,1)*clamp((k-P*.14)/(P*.2),0,1);g.globalAlpha=al;g.beginPath();HE.path([[-X,yC,gz],[X,yC,gz],[X,yF,gz],[-X,yF,gz]],true);HE.path(pts,true);g.fillStyle=blend('#f6f3ff',w1,.18);g.fill('evenodd');
+    const sc=P/k;g.strokeStyle=dp;g.lineJoin='round';g.globalAlpha=al*.16;g.lineWidth=24*sc;HE.line(pts);g.globalAlpha=al*.9;g.lineWidth=Math.max(1,4*sc);HE.line(pts);
+    g.fillStyle=dp;for(const p of pts.slice(1,-1)){const s=HE.scr(HE.view(...p)),m=7*sc;g.fillRect(s[0]-m,s[1]-m,m*2,m*2)}}
+  g.globalAlpha=1}
 function openHall(t,at){setPal(t.wing);buildHall(t,at);$('hallName').textContent=t.name;$('hallWing').textContent=t.wing.name;$('hallBack').href='#/wing/'+t.wing.id;$('hallBack').textContent='→ جناح '+t.wing.name;
   $('zones').innerHTML=t.zones.length>1?t.zones.map((z,i)=>`<button type="button" data-z="${i}">${esc(z.t)}</button>`).join(''):'';lastCap=-1;if(!hallOn){hallOn=true;hallFrame()}}
 let lastCap=-1,lastHash=0;
-function hallFrame(now){if(!hallOn)return;const s=H.stops,m=s.length-1;
+function hallFrame(now){if(!hallOn)return;requestAnimationFrame(hallFrame);if(frozen())return;const s=H.stops,m=s.length-1;
   if(touring&&now&&now-tourT>4600&&!$('view').open&&!document.querySelector('dialog[open]')){tourT=now;if(Math.round(ht)>=m)location.hash=tURL(TEACH[(TEACH.indexOf(H.t)+1)%TEACH.length]);else ht=Math.round(ht)+1}
   const d=ht-hp;hp+=calm?d:Math.sign(d)*Math.min(Math.abs(d)*.075,.11+Math.abs(d)*.02);if(Math.abs(ht-hp)<.0005)hp=ht;
   const i=clamp(Math.floor(hp),0,m),f=clamp(hp-i,0,1),a=s[i],b=s[Math.min(m,i+1)],e=f*f*(3-2*f),z=a.z+(b.z-a.z)*e,y=a.yaw+(b.yaw-a.yaw)*e,bob=calm?0:Math.sin(e*Math.PI*2)*5;
-  hw.style.transform=`perspective(${H.P}px) translateZ(${H.P}px) rotateY(${y}rad) translate3d(0,${bob}px,${-z}px)`;
-  for(const g of H.segs){const k=z-g.dataset.z,on=k>-H.segL&&k<H.segL*5.2;g.style.display=on?'':'none';
-    if(on){g.style.opacity=k>H.segL*3?clamp(1-(k-H.segL*3)/(H.segL*2),0,1):1;g.lastElementChild.style.visibility=k>H.P*.12?'visible':'hidden'}}
-  for(const o of H.objs){const k=z-o.dataset.z,on=k>H.P*.16&&k<H.segL*3.4;o.style.display=on?'':'none';if(on){const q=o.querySelector('img[data-src]');if(q){q.src=q.dataset.src;q.removeAttribute('data-src')}o.style.opacity=clamp(Math.min((H.segL*3.4-k)/H.segL,(k-H.P*.16)/(H.P*.2)),0,1)}}
+  const key=z+'|'+y;if(key!==H.key){H.key=key;hw.style.transform=`perspective(${H.P}px) translateZ(${H.P}px) rotateY(${y}rad) translate3d(0,${bob}px,${-z}px)`;drawHall(z,y,bob);
+  for(const o of H.objs){const k=z-o.dataset.z,on=k>H.P*.16&&k<H.far;if(on!==o._on){o._on=on;o.style.display=on?'':'none'}
+    if(on){const q=o._im===undefined?(o._im=o.querySelector('img[data-src]')):o._im;if(q&&!q.hasAttribute('src'))q.src=q.dataset.src;o.style.opacity=clamp(Math.min((H.far-k)/(H.segL*.8),(k-H.P*.16)/(H.P*.2)),0,1).toFixed(2)}
+    else if(o._im&&Math.abs(k)>H.segL*5&&o._im.hasAttribute('src'))o._im.removeAttribute('src')}}
   const c=Math.round(hp);if(c!==lastCap){lastCap=c;const n=H.t.items.length,it=H.t.items[c-1];$('hCap').textContent=c===0?'اسحبي أو استخدمي الأسهم للتنقل في القاعة':it?`${ar(c)} من ${ar(n)}`:'نهاية القاعة';
     $('rail').firstChild.style.width=clamp(c/n*100,0,100)+'%';$('hPrev').disabled=c===0;$('hNext').disabled=c===m;
     [...$('zones').children].forEach((b,k)=>{const on=it&&it.zone===k;if(on&&b.getAttribute('aria-current')!=='true'&&b.scrollIntoView&&innerWidth<760)$('zones').scrollTo({left:b.offsetLeft-$('zones').clientWidth/2+b.clientWidth/2});b.setAttribute('aria-current',!!on)});
-    const near=H.t.items.slice(Math.max(0,c-1),c+6);near.forEach(x=>{if(x.th){new Image().src=x.th}})}
-  requestAnimationFrame(hallFrame)}
+    const near=H.t.items.slice(Math.max(0,c-1),c+4);near.forEach(x=>{if(x.th){new Image().src=x.th}})}}
 const hGo=d=>{if(H)ht=clamp(Math.round(ht)+d,0,H.stops.length-1)};
 const stopTour=()=>{touring=0;$('tour').setAttribute('aria-pressed','false');$('tour').textContent='جولة تلقائية'};
 $('hNext').onclick=()=>{stopTour();hGo(1)};$('hPrev').onclick=()=>{stopTour();hGo(-1)};
@@ -191,9 +249,14 @@ $('zones').onclick=e=>{const b=e.target.closest('button');if(b){stopTour();ht=H.
 $('rail').onclick=e=>{const r=$('rail').getBoundingClientRect(),k=(r.right-e.clientX)/r.width;stopTour();ht=clamp(Math.round(k*H.t.items.length),0,H.stops.length-1);if(Math.abs(ht-hp)>6)hp=ht-Math.sign(ht-hp)*4};
 hw.addEventListener('click',e=>{const w=e.target.closest('.work');if(!w)return;stopTour();const i=+w.dataset.i;if(Math.round(ht)!==i+1){ht=i+1;return}openView(H.t.items,i)});
 
+/* النوافذ المفتوحة توقف المشهد خلفها وتحرر ذاكرته */
+let stale=false;const frozen=()=>document.body.classList.contains('dlg');
+const openDlg=d=>{if(!d.open)d.showModal();document.body.classList.add('dlg')};
+document.querySelectorAll('dialog').forEach(d=>d.addEventListener('close',()=>{if(d.id==='all'||d.id==='guide'){if(d._io)d._io.disconnect();d.innerHTML=''}if(!document.querySelector('dialog[open]')){document.body.classList.remove('dlg');if(stale){stale=false;relayout()}else{if(H)H.key='';if(LB)LB.key=''}}}));
+
 /* ---------- عارض الأعمال ---------- */
 const V=$('view');let vl=[],vi=0,pg=0;
-function openView(list,i){vl=list;vi=i;pg=0;if(!V.open)V.showModal();drawView()}
+function openView(list,i){vl=list;vi=i;pg=0;openDlg(V);drawView()}
 function drawView(dx){const it=vl[vi],B=$('vBody');B.className='v-body';$('vT').textContent=it.t;$('vBy').textContent=[it.by,it.teacher&&it.teacher.name+'، '+it.teacher.wing.name].filter(Boolean).join(' | ');
   $('vN').textContent=`${ar(vi+1)} من ${ar(vl.length)}`;const doc=it.k==='pdf'||it.k==='pptx';$('vPages').hidden=!doc||it.n<2;
   if(it.k==='video'){B.innerHTML=`<video src="${it.src}" poster="${it.th}" controls playsinline></video>`;const v=B.firstChild;const p=v.play();if(p)p.catch(()=>{})}
@@ -210,17 +273,20 @@ $('vBody').addEventListener('touchend',e=>{if(tx==null)return;const d=e.changedT
 
 /* ---------- النوافذ ---------- */
 const head=t=>`<div class="sh-top"><h2>${esc(t)}</h2><button type="button" class="x" data-x aria-label="إغلاق">✕</button></div>`;
-const tile=(it,k)=>`<button type="button" data-k="${k}">${it.th?`<img src="${it.th}" width="${it.w}" height="${it.h}" alt="" loading="lazy">`:`<span class="lk">${esc(it.host)}</span>`}<span>${esc(it.t)}<small>${esc([it.by,badge(it)].filter(Boolean).join(' | '))}</small></span></button>`;
-$('showAll').onclick=()=>{stopTour();const t=H.t,d=$('all');d.innerHTML=`<div class="wrap">${head(t.name)}${t.zones.map(z=>`<h3 class="zt">${esc(z.t)}</h3><div class="mas">${z.items.map((it,k)=>tile(it,z.start+k)).join('')}</div>`).join('')}</div>`;d.onclick=e=>{const b=e.target.closest('[data-k]');if(b)openView(t.items,+b.dataset.k)};d.showModal();d.scrollTop=0};
+const small=s=>s.replace('/thumb/','/sm/');
+const tile=(it,k)=>`<button type="button" data-k="${k}">${it.th?`<img data-sm="${small(it.th)}" style="aspect-ratio:${it.w}/${it.h}" alt="">`:`<span class="lk">${esc(it.host)}</span>`}<span>${esc(it.t)}<small>${esc([it.by,badge(it)].filter(Boolean).join(' | '))}</small></span></button>`;
+function masonry(its,off){const n=innerWidth<=760?2:innerWidth<1000?3:4,col=Array.from({length:n},()=>[]),ht=Array(n).fill(0);its.forEach((it,k)=>{const m=ht.indexOf(Math.min(...ht));col[m].push(tile(it,off+k));ht[m]+=it.h/it.w+.38});return `<div class="mas">${col.map(x=>`<div>${x.join('')}</div>`).join('')}</div>`}
+function lazyIn(d){if(d._io)d._io.disconnect();const io=d._io=new IntersectionObserver(es=>es.forEach(e=>{const m=e.target;if(e.isIntersecting){if(!m.hasAttribute('src'))m.src=m.dataset.sm}else if(m.hasAttribute('src'))m.removeAttribute('src')}),{root:d,rootMargin:'700px 0px'});d.querySelectorAll('img[data-sm]').forEach(m=>io.observe(m))}
+$('showAll').onclick=()=>{stopTour();const t=H.t,d=$('all');d.innerHTML=`<div class="wrap">${head(t.name)}${t.zones.map(z=>`<h3 class="zt">${esc(z.t)}</h3>${masonry(z.items,z.start)}`).join('')}</div>`;d.onclick=e=>{const b=e.target.closest('[data-k]');if(b)openView(t.items,+b.dataset.k)};openDlg(d);d.scrollTop=0;lazyIn(d)};
 const norm=s=>String(s||'').replace(/[ًٌٍَُِّْـ]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').toLowerCase();
 FLAT.forEach(x=>x.q=norm([x.t,x.by,x.teacher.name,x.teacher.wing.name].join(' ')));
 function guide(){const d=$('guide');d.innerHTML=`<div class="wrap">${head('دليل المعرض')}<input class="search" id="q" type="search" placeholder="ابحثي باسم طالبة أو معلمة أو عمل" aria-label="بحث في المعرض" autocomplete="off"><div id="gOut"></div></div>`;
   const list=`<div class="g-list">${WINGS.map(w=>`<section style="--c:${w.pal[2]}"><h3>${w.teachers.length?`<a href="#/wing/${w.id}">${esc(w.name)}</a>`:esc(w.name)}</h3>${w.teachers.length?`<ul>${w.teachers.map(t=>`<li><a href="${tURL(t)}"><b>${esc(t.name)}<small>${inside(t.items)}</small></b><span>${nWorks(t.items.length)}</span></a></li>`).join('')}</ul>`:'<p class="muted">يُفتتح قريبًا</p>'}</section>`).join('')}</div>`;
-  let res=[];$('gOut').innerHTML=list;$('q').oninput=e=>{const q=norm(e.target.value.trim());if(q.length<2){$('gOut').innerHTML=list;return}res=FLAT.filter(x=>q.split(/\s+/).every(p=>x.q.includes(p)));$('gOut').innerHTML=res.length?`<p class="zt">${nWorks(res.length)}</p><div class="mas">${res.slice(0,60).map(tile).join('')}</div>`:'<p class="zt">لا توجد نتائج بهذا الاسم</p>'};
-  d.onclick=e=>{const b=e.target.closest('[data-k]');if(b)openView(res,+b.dataset.k);else if(e.target.closest('a'))d.close()};d.showModal()}
+  let res=[];$('gOut').innerHTML=list;$('q').oninput=e=>{const q=norm(e.target.value.trim());if(q.length<2){$('gOut').innerHTML=list;return}res=FLAT.filter(x=>q.split(/\s+/).every(p=>x.q.includes(p)));$('gOut').innerHTML=res.length?`<p class="zt">${nWorks(res.length)}</p>${masonry(res.slice(0,60),0)}`:'<p class="zt">لا توجد نتائج بهذا الاسم</p>';lazyIn(d)};
+  d.onclick=e=>{const b=e.target.closest('[data-k]');if(b)openView(res,+b.dataset.k);else if(e.target.closest('a'))d.close()};openDlg(d)}
 function about(){const d=$('about');d.innerHTML=`<div class="wrap">${head('عن المبادرة')}<p class="big"><b>متمكنة رقميًا ومبدعة في الذكاء الاصطناعي</b><br>مبادرة من ${esc(E.school)} تجمع في معرض واحد ما أنجزته المعلمات وطالباتهن بالأدوات الرقمية وتطبيقات الذكاء الاصطناعي.</p>
   <div class="nums"><div><b>${ar(OPEN.length)}</b>أجنحة</div><div><b>${ar(teachers)}</b>معلمة ومشاركة</div><div><b>${ar(total)}</b>عملًا معروضًا</div><div><b>${ar(FLAT.filter(x=>x.k==='video').length)}</b>فيديو</div></div>
-  <div class="who"><div><span class="muted">إعداد المعلمتين</span>${E.authors.map(a=>`<b>${esc(a)}</b>`).join('')}</div><div><span class="muted">مديرة المدرسة</span><b>${esc(E.principal)}</b></div><div><span class="muted">المدرسة</span><b>${esc(E.school)}</b></div></div></div>`;d.onclick=null;d.showModal()}
+  <div class="who"><div><span class="muted">إعداد المعلمتين</span>${E.authors.map(a=>`<b>${esc(a)}</b>`).join('')}</div><div><span class="muted">مديرة المدرسة</span><b>${esc(E.principal)}</b></div><div><span class="muted">المدرسة</span><b>${esc(E.school)}</b></div></div></div>`;d.onclick=null;openDlg(d)}
 document.addEventListener('click',e=>{const o=e.target.closest('[data-open]');if(o){stopTour();o.dataset.open==='guide'?guide():about()}const x=e.target.closest('[data-x]');if(x)x.closest('dialog').close()});
 
 /* ---------- لوحة المفاتيح ---------- */
@@ -232,17 +298,18 @@ addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;const n=e.ke
   else if(!$('intro').hidden&&e.key==='Enter'&&e.target===document.body)$('enter').click()});
 
 /* ---------- التنقل ---------- */
-buildLobby();let booted=false;
-function show(name){['intro','lobby','wing','hall'].forEach(k=>$(k).hidden=k!==name);arcOn=name==='intro'&&arcOn;if(name!=='intro')arcOn=false;if(name!=='lobby')lobOn=false;if(name!=='hall'){hallOn=false;stopTour()}
+let booted=false;
+function show(name){if(name!=='lobby'){ring.innerHTML='';LE.free()}if(name!=='hall'){hw.innerHTML='';H=null;hallOn=false;HE.free()}if(name!=='wing')$('wing').innerHTML='';if(name!=='intro'){arc.width=arc.height=1}['intro','lobby','wing','hall'].forEach(k=>$(k).hidden=k!==name);arcOn=name==='intro'&&arcOn;if(name!=='intro')arcOn=false;if(name!=='lobby')lobOn=false;if(name!=='hall'){hallOn=false;stopTour()}
   $('bar').hidden=name==='intro'||name==='hall';$('bar').classList.toggle('on-light',name==='lobby')}
 function route(){const [,a,b,c,d]=location.hash.split('/');let go,color='#ffffff';const w=WINGS.find(x=>x.id===b&&x.teachers.length),t=w&&w.teachers.find(x=>x.id===c);
   if(a==='hall'&&t){color=w.pal[0];go=()=>{const keep=touring;show('hall');openHall(t,+d||0);if(keep){touring=1;tourT=performance.now()}}}
   else if(a==='wing'&&w){color=w.pal[0];go=()=>{lt=la=w.i;show('wing');renderWing(w)}}
   else if(a==='lobby'){color='#ffffff';go=()=>{show('lobby');if(!lobOn){lobOn=true;lobFrame.c=-1;buildLobby();if(lobPort()&&!calm)la=lt+.45;lobFrame()}}}
   else go=()=>{show('intro');startArc()};
-  document.querySelectorAll('dialog[open]').forEach(x=>x.close());
+  document.querySelectorAll('dialog[open]').forEach(x=>x.close());document.body.classList.remove('dlg');
   if(booted)wipe(color,go);else{booted=true;go()}}
 addEventListener('hashchange',route);
-let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(!$('intro').hidden){sizeArc();drawArc()}if(lobOn)buildLobby();if(hallOn)buildHall(H.t,Math.round(ht))},160)});
+function relayout(){if(!$('intro').hidden){sizeArc();drawArc()}if(lobOn)buildLobby();if(hallOn&&H)buildHall(H.t,Math.round(ht))}
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(frozen())stale=true;else relayout()},180)});
 route();
 })();

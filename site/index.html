@@ -8,8 +8,8 @@
 <title>متمكنة رقميًا | معرض ثانوية أبي عروة</title>
 <meta name="description" content="معرض تقني تفاعلي لأعمال معلمات وطالبات ثانوية أبي عروة بالذكاء الاصطناعي">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23e6ddff'/%3E%3Cpath d='M6 20v-8c0-4 3-6 6-8 3 2 6 4 6 8v8z' fill='%237d5ce0'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="assets/fonts.css">
-<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="assets/fonts.css?v=2">
+<link rel="stylesheet" href="assets/style.css?v=2">
 </head>
 <body>
 <header class="bar" id="bar" hidden>
@@ -33,7 +33,7 @@
   </section>
 
   <section class="scene lobby" id="lobby" hidden aria-label="أقسام المعرض">
-    <div class="stage" id="rotunda"><div class="world" id="ring"></div></div>
+    <div class="stage" id="rotunda"><canvas class="env" id="lobEnv" aria-hidden="true"></canvas><div class="world" id="ring"></div></div>
     <div class="lobby-ui">
       <button type="button" class="step" id="lobPrev" aria-label="الجناح السابق">→</button>
       <div class="lob-now" id="lobNow" aria-live="polite"></div>
@@ -44,7 +44,7 @@
   <section class="scene wing" id="wing" hidden></section>
 
   <section class="scene hall" id="hall" hidden>
-    <div class="stage" id="hallStage"><div class="world" id="hallWorld"></div></div>
+    <div class="stage" id="hallStage"><canvas class="env" id="hallEnv" aria-hidden="true"></canvas><div class="world" id="hallWorld"></div></div>
     <div class="hall-top">
       <a class="back" id="hallBack" href="#/lobby">→ عودة</a>
       <div class="hall-title"><strong id="hallName"></strong><span id="hallWing"></span></div>
@@ -73,7 +73,7 @@
 </dialog>
 <canvas id="wipe" aria-hidden="true"></canvas>
 <noscript>يحتاج المعرض إلى تفعيل JavaScript في المتصفح.</noscript>
-<script src="assets/data.js"></script>
-<script src="assets/app.js"></script>
+<script src="assets/data.js?v=2"></script>
+<script src="assets/app.js?v=2"></script>
 </body>
 </html>
