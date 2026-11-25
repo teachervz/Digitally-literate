@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#dfe0ff">
+<title>متمكنة رقميًا | معرض ثانوية أبي عروة</title>
+<meta name="description" content="معرض تقني تفاعلي لأعمال معلمات وطالبات ثانوية أبي عروة بالذكاء الاصطناعي">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23e6ddff'/%3E%3Cpath d='M6 20v-8c0-4 3-6 6-8 3 2 6 4 6 8v8z' fill='%237d5ce0'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="bar" id="bar" hidden>
+  <a class="brand" href="#/lobby" aria-label="العودة للرئيسية"><span class="mark" aria-hidden="true"></span>متمكنة رقميًا</a>
+  <nav>
+    <button type="button" data-open="guide">دليل المعرض</button>
+    <button type="button" data-open="about">عن المبادرة</button>
+  </nav>
+</header>
+
+<main>
+  <section class="scene intro" id="intro" aria-label="مدخل المعرض">
+    <canvas id="arcade" aria-hidden="true"></canvas>
+    <div class="intro-text">
+      <h1><span>متمكنة</span> <span>رقميًا</span></h1>
+      <p class="sub">ومبدعة في الذكاء الاصطناعي</p>
+      <p class="lead" id="lead"></p>
+      <div class="cta"><button type="button" class="enter" id="enter">ادخلي المعرض</button><button type="button" class="ghost" data-open="guide">دليل المعرض</button></div>
+    </div>
+    <dl class="credits" id="credits"></dl>
+  </section>
+
+  <section class="scene lobby" id="lobby" hidden aria-label="أقسام المعرض">
+    <div class="stage" id="rotunda"><div class="world" id="ring"></div></div>
+    <div class="lobby-ui">
+      <button type="button" class="step" id="lobPrev" aria-label="الجناح السابق">→</button>
+      <div class="lob-now" id="lobNow" aria-live="polite"></div>
+      <button type="button" class="step" id="lobNext" aria-label="الجناح التالي">←</button>
+    </div>
+  </section>
+
+  <section class="scene wing" id="wing" hidden></section>
+
+  <section class="scene hall" id="hall" hidden>
+    <div class="stage" id="hallStage"><div class="world" id="hallWorld"></div></div>
+    <div class="hall-top">
+      <a class="back" id="hallBack" href="#/lobby">→ عودة</a>
+      <div class="hall-title"><strong id="hallName"></strong><span id="hallWing"></span></div>
+      <div class="hall-act">
+        <button type="button" id="tour" aria-pressed="false">جولة تلقائية</button>
+        <button type="button" id="showAll">عرض الكل</button>
+      </div>
+    </div>
+    <div class="hall-bottom">
+      <button type="button" class="step" id="hPrev" aria-label="العمل السابق">→</button>
+      <div class="track"><div class="zones" id="zones"></div><div class="rail" id="rail"><i></i></div><p id="hCap" aria-live="polite"></p></div>
+      <button type="button" class="step" id="hNext" aria-label="العمل التالي">←</button>
+    </div>
+  </section>
+</main>
+
+<dialog id="all" class="sheet"></dialog>
+<dialog id="guide" class="sheet"></dialog>
+<dialog id="about" class="sheet about"></dialog>
+
+<dialog id="view" class="view" aria-label="عرض العمل">
+  <div class="v-top"><div><strong id="vT"></strong><span id="vBy"></span></div><button type="button" id="vX" aria-label="إغلاق">✕</button></div>
+  <div class="v-body" id="vBody"></div>
+  <div class="v-pages" id="vPages" hidden><button type="button" id="pPrev">الصفحة السابقة</button><span id="pN"></span><button type="button" id="pNext">الصفحة التالية</button></div>
+  <div class="v-nav"><button type="button" id="vPrev">→ العمل السابق</button><span id="vN"></span><button type="button" id="vNext">العمل التالي ←</button></div>
+</dialog>
+<canvas id="wipe" aria-hidden="true"></canvas>
+<noscript>يحتاج المعرض إلى تفعيل JavaScript في المتصفح.</noscript>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+</body>
+</html>
