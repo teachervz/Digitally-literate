@@ -310,3 +310,5 @@ body.dlg .wing{visibility:hidden}
 .mas img{background:#f1edff}
 @media(max-width:1100px),(hover:none){.door>.in::before{display:none}.work .halo{display:none}.work .fr{box-shadow:0 0 0 2px color-mix(in srgb,var(--deep) 55%,#fff),0 14px 30px #2d1f7a3d}.mas button{box-shadow:0 2px 10px #4a36a51f}.wing{background-attachment:scroll}}
 @media(min-width:600px){.lobby.port .plate b{font-size:38px}.lobby.port .plate.long b{font-size:29px}.lobby.port .plate span{font-size:20px}.lobby.port .plate i{font-size:17px}.lobby.port .hang u{font-size:16px}.lobby.port .door>.in::after{width:128px;height:118px}.lobby.port .door .ico{width:74px;height:74px}}
+.sign.big{white-space:normal;width:max-content;max-width:min(88vw,760px)}
+.hall-title{min-width:0}.hall-title strong{line-height:1.4}

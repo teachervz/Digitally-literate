@@ -21,7 +21,7 @@ const PAL=[['#dfe7ff','#b9c9ff','#4663d0'],['#ecdfff','#d0b8ff','#7a4fd0'],['#dc
 
 /* ---------- البيانات ---------- */
 const WINGS=E.wings;let total=0,teachers=0;const FLAT=[];
-WINGS.forEach((w,i)=>{w.i=i;w.pal=PAL[i%PAL.length];w.count=0;w.teachers.forEach(t=>{t.wing=w;t.items=[];t.zones.forEach((z,zi)=>{z.start=t.items.length;z.items.forEach(it=>{const o=Object.assign({},it,{zone:zi,ti:t.items.length,teacher:t});t.items.push(o);FLAT.push(o)})});w.count+=t.items.length;if(!/أعمال القسم/.test(t.name))teachers++});total+=w.count});
+WINGS.forEach((w,i)=>{w.i=i;w.pal=PAL[i%PAL.length];w.count=0;w.teachers.forEach(t=>{t.wing=w;t.items=[];t.zones.forEach((z,zi)=>{z.start=t.items.length;z.items.forEach(it=>{const o=Object.assign({},it,{zone:zi,ti:t.items.length,teacher:t});t.items.push(o);FLAT.push(o)})});w.count+=t.items.length;if(!/أعمال القسم/.test(t.name))teachers+=t.people||1});total+=w.count});
 const OPEN=WINGS.filter(w=>w.teachers.length),TEACH=OPEN.flatMap(w=>w.teachers);
 const tURL=(t,i)=>`#/hall/${t.wing.id}/${t.id}${i?'/'+i:''}`;
 /* واجهة القسم: عمل من كل نوع (صورة، فيديو، عرض، PDF، رابط) ثم الباقي بالتناوب بين المعلمات */
